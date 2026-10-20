@@ -1,0 +1,68 @@
+{
+  "name": "MenuItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "default": ""
+    },
+    "price": {
+      "type": "number",
+      "title": "Price"
+    },
+    "image": {
+      "type": "string",
+      "title": "Image URL",
+      "default": ""
+    },
+    "category_id": {
+      "type": "string",
+      "title": "Category ID"
+    },
+    "category_label": {
+      "type": "string",
+      "title": "Category Label",
+      "default": ""
+    },
+    "tag": {
+      "type": "string",
+      "title": "Tag",
+      "default": ""
+    },
+    "approval": {
+      "type": "string",
+      "title": "Approval %",
+      "default": ""
+    },
+    "ratings": {
+      "type": "number",
+      "title": "Ratings",
+      "default": 0
+    },
+    "item_id": {
+      "type": "string",
+      "title": "Original Item ID",
+      "default": ""
+    },
+    "in_stock": {
+      "type": "boolean",
+      "title": "In Stock",
+      "default": true
+    },
+    "display_order": {
+      "type": "number",
+      "title": "Display Order",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "price",
+    "category_id"
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "customer_name": {
+      "type": "string",
+      "title": "Customer Name",
+      "default": "Walk-in"
+    },
+    "customer_phone": {
+      "type": "string",
+      "title": "Customer Phone",
+      "default": ""
+    },
+    "items": {
+      "type": "array",
+      "title": "Items",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "subtotal": {
+      "type": "number",
+      "title": "Subtotal",
+      "default": 0
+    },
+    "tax": {
+      "type": "number",
+      "title": "Tax",
+      "default": 0
+    },
+    "tip": {
+      "type": "number",
+      "title": "Tip",
+      "default": 0
+    },
+    "delivery_fee": {
+      "type": "number",
+      "title": "Delivery Fee",
+      "default": 0
+    },
+    "discount": {
+      "type": "number",
+      "title": "Discount",
+      "default": 0
+    },
+    "promo_code": {
+      "type": "string",
+      "title": "Promo Code",
+      "default": ""
+    },
+    "total": {
+      "type": "number",
+      "title": "Total",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "pending",
+        "preparing",
+        "out_for_delivery",
+        "completed",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "order_type": {
+      "type": "string",
+      "title": "Order Type",
+      "enum": [
+        "pickup",
+        "delivery"
+      ],
+      "default": "pickup"
+    },
+    "order_source": {
+      "type": "string",
+      "title": "Order Source",
+      "enum": [
+        "web",
+        "pos"
+      ],
+      "default": "web"
+    },
+    "pickup_time": {
+      "type": "string",
+      "title": "Pickup Time",
+      "default": "ASAP"
+    },
+    "delivery_address": {
+      "type": "string",
+      "title": "Delivery Address",
+      "default": ""
+    },
+    "delivery_notes": {
+      "type": "string",
+      "title": "Delivery Notes",
+      "default": ""
+    },
+    "payment_method": {
+      "type": "string",
+      "title": "Payment Method",
+      "default": "card"
+    },
+    "refund_requested": {
+      "type": "boolean",
+      "title": "Refund Requested",
+      "default": false
+    },
+    "chef_acknowledged": {
+      "type": "boolean",
+      "title": "Chef Acknowledged",
+      "default": false
+    },
+    "prep_started_at": {
+      "type": "string",
+      "title": "Prep Started At",
+      "default": ""
+    },
+    "out_for_delivery_at": {
+      "type": "string",
+      "title": "Out For Delivery At",
+      "default": ""
+    },
+    "delivered_at": {
+      "type": "string",
+      "title": "Delivered At",
+      "default": ""
+    },
+    "eta_minutes": {
+      "type": "number",
+      "title": "ETA Minutes",
+      "default": 0
+    }
+  },
+  "required": [
+    "customer_name",
+    "customer_phone",
+    "total"
+  ]
+}

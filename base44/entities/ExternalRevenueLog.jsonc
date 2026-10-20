@@ -1,0 +1,46 @@
+{
+  "name": "ExternalRevenueLog",
+  "type": "object",
+  "properties": {
+    "log_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "platform": {
+      "type": "string",
+      "title": "Platform",
+      "default": "Uber Eats"
+    },
+    "gross": {
+      "type": "number",
+      "title": "Gross Revenue",
+      "default": 0
+    },
+    "fees": {
+      "type": "number",
+      "title": "Platform Fees",
+      "default": 0
+    },
+    "net": {
+      "type": "number",
+      "title": "Net",
+      "default": 0
+    },
+    "order_count": {
+      "type": "number",
+      "title": "Order Count",
+      "default": 0
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes",
+      "default": ""
+    }
+  },
+  "required": [
+    "log_date",
+    "platform",
+    "gross"
+  ]
+}

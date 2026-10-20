@@ -1,0 +1,54 @@
+{
+  "name": "Promotion",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "title": "Code"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "default": ""
+    },
+    "discount_type": {
+      "type": "string",
+      "title": "Discount Type",
+      "enum": [
+        "percent",
+        "flat"
+      ],
+      "default": "percent"
+    },
+    "value": {
+      "type": "number",
+      "title": "Value",
+      "default": 0
+    },
+    "min_subtotal": {
+      "type": "number",
+      "title": "Minimum Subtotal",
+      "default": 0
+    },
+    "max_uses": {
+      "type": "number",
+      "title": "Max Uses (0 = unlimited)",
+      "default": 0
+    },
+    "uses": {
+      "type": "number",
+      "title": "Uses",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "title": "Active",
+      "default": true
+    }
+  },
+  "required": [
+    "code",
+    "discount_type",
+    "value"
+  ]
+}

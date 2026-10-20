@@ -1,0 +1,20 @@
+{
+  "name": "Kilimandjaro Restaurant",
+  "short_name": "Kilimandjaro",
+  "description": "Authentic West African cuisine. Order pickup or delivery from Philadelphia's heritage kitchen.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#120C08",
+  "theme_color": "#120C08",
+  "categories": ["food", "shopping"],
+  "icons": [
+    {
+      "src": "https://media.base44.com/images/public/6aad469a7ae1b8c0b16c1681/bd63fefc4_generated_image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

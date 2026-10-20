@@ -1,0 +1,77 @@
+{
+  "name": "StoreSettings",
+  "type": "object",
+  "properties": {
+    "master_password": {
+      "type": "string",
+      "title": "Master Password",
+      "default": ""
+    },
+    "open_time": {
+      "type": "string",
+      "title": "Open Time",
+      "default": "11:00"
+    },
+    "close_time": {
+      "type": "string",
+      "title": "Close Time",
+      "default": "22:00"
+    },
+    "weekend_close_time": {
+      "type": "string",
+      "title": "Weekend Close Time (Fri\u2013Sat)",
+      "default": "23:00"
+    },
+    "paused": {
+      "type": "boolean",
+      "title": "Paused",
+      "default": false
+    },
+    "pickup_enabled": {
+      "type": "boolean",
+      "title": "Pickup Enabled",
+      "default": true
+    },
+    "delivery_enabled": {
+      "type": "boolean",
+      "title": "Delivery Enabled",
+      "default": true
+    },
+    "delivery_base_fee": {
+      "type": "number",
+      "title": "Delivery Base Fee",
+      "default": 3.99
+    },
+    "free_delivery_threshold": {
+      "type": "number",
+      "title": "Free Delivery Threshold",
+      "default": 50
+    },
+    "delivery_radius": {
+      "type": "number",
+      "title": "Delivery Radius (miles)",
+      "default": 5
+    },
+    "stripe_connected": {
+      "type": "boolean",
+      "title": "Stripe Connected",
+      "default": false
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "title": "Stripe Account ID",
+      "default": ""
+    },
+    "twilio_configured": {
+      "type": "boolean",
+      "title": "Twilio Configured",
+      "default": false
+    },
+    "phone_for_sms": {
+      "type": "string",
+      "title": "SMS From Number",
+      "default": ""
+    }
+  },
+  "required": []
+}

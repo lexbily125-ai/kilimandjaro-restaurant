@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { TAX_RATE } from "@/data/menu";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { Store, Bike, X, Plus, Minus, Trash2, ShoppingBag, Tag, Sparkles, ChevronRight } from "lucide-react";
 
 const PICKUP_TIMES = ["ASAP", "15 min", "30 min", "45 min", "60 min"];
 const TIP_OPTIONS = [
@@ -64,7 +65,6 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
     else if (pOn && !dOn) setOrderType("pickup");
   }, [settings?.pickup_enabled, settings?.delivery_enabled]);
 
-  // Auto-fill returning guest details saved from a previous checkout
   useEffect(() => {
     try {
       const p = JSON.parse(localStorage.getItem("kj_customer_profile") || "null");
@@ -123,6 +123,10 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
     });
   };
 
+  const routingLabel = orderType === "pickup"
+    ? "Routed to Kitchen → Pickup counter"
+    : "Routed to Kitchen → Courier dispatch";
+
   return (
     <>
       <div
@@ -135,48 +139,96 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
         role="dialog"
         aria-modal="true"
         aria-label="Your order"
-        className="animation-drawer fixed right-0 top-0 z-[1200] flex h-[100dvh] w-[420px] max-w-[100vw] flex-col"
+        className="animation-drawer fixed right-0 top-0 z-[1200] flex h-[100dvh] w-full flex-col sm:w-[440px]"
         style={{ backgroundColor: "var(--k-card)", borderLeft: "1px solid var(--k-line)", transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--k-line)" }}>
-          <h2 className="font-heading text-base font-extrabold uppercase tracking-tight" style={{ color: "var(--k-silk)" }}>Your Order</h2>
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5" style={{ color: "var(--k-gold)" }} />
+            <h2 className="font-heading text-base font-extrabold uppercase tracking-tight" style={{ color: "var(--k-silk)" }}>Your Order</h2>
+            {items.length > 0 && (
+              <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "var(--k-gold)", color: "var(--k-surface)" }}>
+                {items.reduce((n, it) => n + it.qty, 0)}
+              </span>
+            )}
+          </div>
           <button onClick={onClose} aria-label="Close cart" className="k-focus flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/5" style={{ color: "var(--k-muted)" }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
+        {/* Status banners */}
         {(paused || !anyOpen) && (
-          <div className="mx-5 mt-4 rounded-xl p-3 text-xs font-semibold" style={{ background: "rgba(200,90,50,0.12)", border: "1px solid var(--k-terracotta)", color: "var(--k-terracotta)" }}>
+          <div className="mx-4 mt-3 rounded-xl p-3 text-xs font-semibold" style={{ background: "rgba(200,90,50,0.12)", border: "1px solid var(--k-terracotta)", color: "var(--k-terracotta)" }}>
             {!anyOpen ? "Online ordering is currently unavailable. Please call us to place an order." : "The kitchen is currently closed — ordering is paused. Please check back soon."}
           </div>
         )}
 
         {!paused && anyOpen && orderType === "delivery" && freeDeliveryRemaining > 0 && (
-          <div className="mx-5 mt-4 rounded-xl p-3 text-xs font-semibold" style={{ background: "rgba(225,173,1,0.10)", border: "1px solid var(--k-gold)", color: "var(--k-gold)" }}>
+          <div className="mx-4 mt-3 rounded-xl p-3 text-xs font-semibold flex items-center gap-2" style={{ background: "rgba(225,173,1,0.10)", border: "1px solid var(--k-gold)", color: "var(--k-gold)" }}>
+            <Sparkles className="h-3.5 w-3.5 shrink-0" />
             Add ${freeDeliveryRemaining.toFixed(2)} more for FREE Delivery!
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-4 py-4">
           {items.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--k-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
-              <p className="mt-4 text-sm" style={{ color: "var(--k-muted)" }}>Your cart is empty.</p>
-              <p className="mt-1 text-xs" style={{ color: "var(--k-muted)", opacity: 0.7 }}>Tap the + on any dish to start your order.</p>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <ShoppingBag className="h-7 w-7" style={{ color: "var(--k-muted)" }} />
+              </div>
+              <p className="mt-4 text-sm font-semibold" style={{ color: "var(--k-silk)" }}>Your cart is empty</p>
+              <p className="mt-1 text-xs" style={{ color: "var(--k-muted)" }}>Tap the + on any dish to start your order.</p>
+              <button onClick={onClose} className="k-focus mt-5 inline-flex h-11 items-center rounded-full px-5 text-sm font-bold uppercase tracking-wide" style={{ background: "var(--k-gold)", color: "var(--k-surface)" }}>
+                Browse Menu
+              </button>
             </div>
           ) : (
             <>
-              {/* Order type toggle */}
-              <div className="mb-4 flex gap-2">
-                <button onClick={() => pickupOn && setOrderType("pickup")} disabled={!pickupOn} className="k-focus flex-1 rounded-full py-2.5 text-xs font-bold uppercase tracking-wide disabled:opacity-40" style={{ background: orderType === "pickup" ? "var(--k-gold)" : "rgba(255,255,255,0.05)", color: orderType === "pickup" ? "var(--k-surface)" : "var(--k-muted)", border: "1px solid var(--k-line)" }}>Pickup</button>
-                <button onClick={() => deliveryOn && setOrderType("delivery")} disabled={!deliveryOn} className="k-focus flex-1 rounded-full py-2.5 text-xs font-bold uppercase tracking-wide disabled:opacity-40" style={{ background: orderType === "delivery" ? "var(--k-gold)" : "rgba(255,255,255,0.05)", color: orderType === "delivery" ? "var(--k-surface)" : "var(--k-muted)", border: "1px solid var(--k-line)" }}>Delivery</button>
+              {/* Order type toggle — prominent, icon-led */}
+              <div className="mb-4 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => pickupOn && setOrderType("pickup")}
+                  disabled={!pickupOn}
+                  className="k-focus flex flex-col items-center gap-1 rounded-2xl py-3 text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-40"
+                  style={{
+                    background: orderType === "pickup" ? "var(--k-gold)" : "rgba(255,255,255,0.04)",
+                    color: orderType === "pickup" ? "var(--k-surface)" : "var(--k-muted)",
+                    border: `1.5px solid ${orderType === "pickup" ? "var(--k-gold)" : "var(--k-line)"}`,
+                  }}
+                >
+                  <Store className="h-5 w-5" />
+                  Pickup
+                </button>
+                <button
+                  onClick={() => deliveryOn && setOrderType("delivery")}
+                  disabled={!deliveryOn}
+                  className="k-focus flex flex-col items-center gap-1 rounded-2xl py-3 text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-40"
+                  style={{
+                    background: orderType === "delivery" ? "var(--k-gold)" : "rgba(255,255,255,0.04)",
+                    color: orderType === "delivery" ? "var(--k-surface)" : "var(--k-muted)",
+                    border: `1.5px solid ${orderType === "delivery" ? "var(--k-gold)" : "var(--k-line)"}`,
+                  }}
+                >
+                  <Bike className="h-5 w-5" />
+                  Delivery
+                </button>
               </div>
 
-              <ul className="space-y-4">
+              {/* Direct order routing indicator */}
+              <div className="mb-4 flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold" style={{ background: "rgba(80,140,200,0.10)", border: "1px solid rgba(80,140,200,0.25)", color: "#7fb4e8" }}>
+                <div className="flex h-1.5 w-1.5 items-center justify-center">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "#7fb4e8" }} />
+                </div>
+                {routingLabel}
+              </div>
+
+              {/* Line items */}
+              <ul className="space-y-3">
                 {items.map((it) => (
-                  <li key={it.id} className="flex items-start justify-between gap-3">
+                  <li key={it.id} className="flex items-start justify-between gap-3 rounded-xl p-3" style={{ background: "rgba(255,255,255,0.03)" }}>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold" style={{ color: "var(--k-silk)" }}>{it.name}</p>
                       {it.modifiers && Object.keys(it.modifiers).length > 0 && (
@@ -188,14 +240,14 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
                       <p className="text-xs" style={{ color: "var(--k-muted)" }}>${it.price.toFixed(2)} each</p>
                       <div className="mt-2 flex items-center gap-2">
                         <button onClick={() => onDec(it.id)} aria-label={`Decrease ${it.name}`} className="k-focus flex h-8 w-8 items-center justify-center rounded-full border transition-colors hover:bg-white/5" style={{ borderColor: "var(--k-line)", color: "var(--k-silk)" }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                          <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span className="w-6 text-center text-sm font-bold" style={{ color: "var(--k-silk)" }} aria-live="polite">{it.qty}</span>
                         <button onClick={() => onInc(it.id)} aria-label={`Increase ${it.name}`} className="k-focus flex h-8 w-8 items-center justify-center rounded-full" style={{ backgroundColor: "var(--k-gold)", color: "var(--k-surface)" }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                          <Plus className="h-3.5 w-3.5" />
                         </button>
-                        <button onClick={() => onRemove(it.id)} aria-label={`Remove ${it.name}`} className="k-focus ml-1 flex h-8 w-8 items-center justify-center rounded-full transition-colors" style={{ color: "var(--k-muted)" }} onMouseEnter={(e) => (e.currentTarget.style.color = "var(--k-terracotta)")} onMouseLeave={(e) => (e.currentTarget.style.color = "var(--k-muted)")}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                        <button onClick={() => onRemove(it.id)} aria-label={`Remove ${it.name}`} className="k-focus ml-1 flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-white/5" style={{ color: "var(--k-muted)" }}>
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
@@ -204,7 +256,8 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
                 ))}
               </ul>
 
-              <div className="mt-6 space-y-4 pt-5" style={{ borderTop: "1px solid var(--k-line)" }}>
+              {/* Customer details */}
+              <div className="mt-5 space-y-4 pt-5" style={{ borderTop: "1px solid var(--k-line)" }}>
                 <div>
                   <label htmlFor="cust-name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--k-muted)" }}>Customer Name</label>
                   <input id="cust-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" className="k-input" />
@@ -237,11 +290,11 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
                 {/* Tip */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--k-muted)" }}>Add a Tip</label>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {TIP_OPTIONS.map((t) => (
-                      <button key={t.pct} onClick={() => setTipPct(t.pct)} className="k-focus flex-1 rounded-full py-2 text-xs font-bold uppercase" style={{ background: tipPct === t.pct ? "var(--k-gold)" : "rgba(255,255,255,0.05)", color: tipPct === t.pct ? "var(--k-surface)" : "var(--k-muted)", border: "1px solid var(--k-line)" }}>{t.label}</button>
+                      <button key={t.pct} onClick={() => setTipPct(t.pct)} className="k-focus rounded-full py-2 text-xs font-bold uppercase" style={{ background: tipPct === t.pct ? "var(--k-gold)" : "rgba(255,255,255,0.05)", color: tipPct === t.pct ? "var(--k-surface)" : "var(--k-muted)", border: "1px solid var(--k-line)" }}>{t.label}</button>
                     ))}
-                    <button onClick={() => setTipPct("custom")} className="k-focus flex-1 rounded-full py-2 text-xs font-bold uppercase" style={{ background: tipPct === "custom" ? "var(--k-gold)" : "rgba(255,255,255,0.05)", color: tipPct === "custom" ? "var(--k-surface)" : "var(--k-muted)", border: "1px solid var(--k-line)" }}>Custom</button>
+                    <button onClick={() => setTipPct("custom")} className="k-focus rounded-full py-2 text-xs font-bold uppercase" style={{ background: tipPct === "custom" ? "var(--k-gold)" : "rgba(255,255,255,0.05)", color: tipPct === "custom" ? "var(--k-surface)" : "var(--k-muted)", border: "1px solid var(--k-line)" }}>Custom</button>
                   </div>
                   {tipPct === "custom" && (
                     <input type="number" min="0" step="0.50" value={customTip} onChange={(e) => setCustomTip(e.target.value)} placeholder="Tip amount $" className="k-input mt-2" />
@@ -252,7 +305,10 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--k-muted)" }}>Promo Code</label>
                   <div className="flex gap-2">
-                    <input value={promoInput} onChange={(e) => setPromoInput(e.target.value)} placeholder="e.g. DIRECT15" className="k-input" />
+                    <div className="relative flex-1">
+                      <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--k-muted)" }} />
+                      <input value={promoInput} onChange={(e) => setPromoInput(e.target.value)} placeholder="e.g. DIRECT15" className="k-input pl-9" />
+                    </div>
                     <button onClick={applyPromo} className="k-focus inline-flex h-12 shrink-0 items-center rounded-full px-4 text-xs font-bold uppercase tracking-wide" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid var(--k-line)", color: "var(--k-silk)" }}>Apply</button>
                   </div>
                   {promoError && <p className="mt-1 text-[11px]" style={{ color: "var(--k-terracotta)" }}>{promoError}</p>}
@@ -267,8 +323,9 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
           )}
         </div>
 
+        {/* Sticky bottom summary + CTA */}
         {items.length > 0 && (
-          <div className="px-5 py-4" style={{ borderTop: "1px solid var(--k-line)" }}>
+          <div className="px-4 py-4" style={{ borderTop: "1px solid var(--k-line)", background: "var(--k-card)" }}>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between" style={{ color: "var(--k-muted)" }}><dt>Subtotal</dt><dd>${subtotal.toFixed(2)}</dd></div>
               <div className="flex justify-between" style={{ color: "var(--k-muted)" }}><dt>Est. Tax (8.0%)</dt><dd>${tax.toFixed(2)}</dd></div>
@@ -277,11 +334,12 @@ export default function CartDrawer({ open, onClose, items, onInc, onDec, onRemov
               {tip > 0 && <div className="flex justify-between" style={{ color: "var(--k-gold)" }}><dt>Tip</dt><dd>${tip.toFixed(2)}</dd></div>}
               <div className="flex justify-between pt-2 text-base font-extrabold" style={{ color: "var(--k-silk)", borderTop: "1px solid var(--k-line)" }} aria-live="polite"><dt>Total</dt><dd>${total.toFixed(2)}</dd></div>
             </dl>
-            <button onClick={handleCheckout} disabled={!canCheckout} className="k-focus mt-4 flex h-12 w-full items-center justify-center rounded-full text-sm font-bold uppercase tracking-wide transition-transform hover:scale-[1.01] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40" style={{ backgroundColor: "var(--k-gold)", color: "var(--k-surface)" }}>
+            <button onClick={handleCheckout} disabled={!canCheckout} className="k-focus mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-full text-sm font-bold uppercase tracking-wide transition-transform hover:scale-[1.01] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40" style={{ backgroundColor: "var(--k-gold)", color: "var(--k-surface)" }}>
               Proceed to Payment
+              <ChevronRight className="h-4 w-4" />
             </button>
             {!canCheckout && !paused && <p className="mt-2 text-center text-[11px]" style={{ color: "var(--k-muted)" }}>Add your name, phone{orderType === "delivery" ? " and address" : ""} to check out.</p>}
-            <Link to="/orders" onClick={onClose} className="mt-3 block text-center text-[11px] font-semibold" style={{ color: "var(--k-muted)" }}>Track an existing order →</Link>
+            <Link to="/orders" onClick={onClose} className="mt-2 block text-center text-[11px] font-semibold" style={{ color: "var(--k-muted)" }}>Track an existing order →</Link>
           </div>
         )}
       </aside>

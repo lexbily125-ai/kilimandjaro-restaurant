@@ -12,6 +12,7 @@ import Footer from "@/components/kilimandjaro/Footer";
 import { MODIFIERS, TAX_RATE } from "@/data/menu";
 import { useMenu } from "@/hooks/useMenu";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { useCart } from "@/lib/CartContext";
 import { base44 } from "@/api/base44Client";
 import PaymentModal from "@/components/kilimandjaro/PaymentModal";
 
@@ -20,11 +21,11 @@ const STORY_IMAGE = "https://media.base44.com/images/public/6aad469a7ae1b8c0b16c
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("full_menu");
-  const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [configuringItem, setConfiguringItem] = useState(null);
   const { menuByCategory, loading: menuLoading } = useMenu();
   const { settings: storeSettings } = useStoreSettings();
+  const { items: cart, cartCount, subtotal, qtyByItemId, addItem, changeItemQty, clearCart } = useCart();
 
   const allMenuItems = useMemo(
     () => Object.values(menuByCategory).flat(),
@@ -42,53 +43,19 @@ export default function Home() {
       setConfiguringItem(item);
       return;
     }
-    setCart((prev) => {
-      const existing = prev.find((it) => it.id === item.id);
-      if (existing) {
-        return prev.map((it) => (it.id === item.id ? { ...it, qty: it.qty + 1 } : it));
-      }
-      return [...prev, { ...item, qty: 1, modifiers: {} }];
-    });
+    addItem({ item, unitPrice: item.price });
     setCartOpen(true);
-  }, []);
+  }, [addItem]);
 
-  const confirmModifiers = (selections, special) => {
-    const item = configuringItem;
-    if (special && special.trim()) {
-      setCart((prev) => [...prev, { ...item, id: `${item.id}-${Date.now()}`, qty: 1, modifiers: selections, special_instructions: special.trim() }]);
-    } else {
-      setCart((prev) => {
-        const existing = prev.find((it) => it.id === item.id);
-        if (existing) return prev.map((it) => (it.id === item.id ? { ...it, qty: it.qty + 1 } : it));
-        return [...prev, { ...item, qty: 1, modifiers: selections, special_instructions: "" }];
-      });
-    }
+  const confirmModifiers = ({ modifiers, specialInstructions, qty, unitPrice }) => {
+    addItem({ item: configuringItem, modifiers, specialInstructions, qty, unitPrice });
     setConfiguringItem(null);
     setCartOpen(true);
   };
 
-  const incItem = (id) =>
-    setCart((prev) => prev.map((it) => (it.id === id ? { ...it, qty: it.qty + 1 } : it)));
+  const incItem = useCallback((id) => changeItemQty(id, 1), [changeItemQty]);
+  const decItem = useCallback((id) => changeItemQty(id, -1), [changeItemQty]);
 
-  const decItem = (id) =>
-    setCart((prev) =>
-      prev
-        .map((it) => (it.id === id ? { ...it, qty: it.qty - 1 } : it))
-        .filter((it) => it.qty > 0)
-    );
-
-  const removeItem = (id) => setCart((prev) => prev.filter((it) => it.id !== id));
-
-  const clearCart = () => setCart([]);
-
-  const cartCount = cart.reduce((sum, it) => sum + it.qty, 0);
-
-  const qtyMap = useMemo(
-    () => Object.fromEntries(cart.map((it) => [it.id, it.qty])),
-    [cart]
-  );
-
-  const subtotal = cart.reduce((sum, it) => sum + it.price * it.qty, 0);
   const discount = checkoutCustomer?.discount || 0;
   const postDiscountSubtotal = Math.max(subtotal - discount, 0);
   const tax = postDiscountSubtotal * TAX_RATE;
@@ -163,7 +130,7 @@ export default function Home() {
             <MenuSection
               category={activeCategory}
               menuByCategory={menuByCategory}
-              qtyMap={qtyMap}
+              qtyMap={qtyByItemId}
               onAdd={addToCart}
               onInc={incItem}
               onDec={decItem}
@@ -179,10 +146,6 @@ export default function Home() {
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
-        items={cart}
-        onInc={incItem}
-        onDec={decItem}
-        onRemove={removeItem}
         onSubmitOrder={submitOrder}
       />
       <ModifierModal

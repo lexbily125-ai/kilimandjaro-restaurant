@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { MODIFIERS } from "@/data/menu";
 
+const money = (n) => `$${n.toFixed(2)}`;
+
 export default function ModifierModal({ item, onConfirm, onClose }) {
   const [selections, setSelections] = useState({});
   const [special, setSpecial] = useState("");
+  const [qty, setQty] = useState(1);
   const groups = item ? MODIFIERS[item.id] || [] : [];
 
   useEffect(() => {
@@ -19,24 +22,28 @@ export default function ModifierModal({ item, onConfirm, onClose }) {
     };
   }, [item, onClose]);
 
-  // reset selections when the item changes
   useEffect(() => {
     setSelections({});
     setSpecial("");
+    setQty(1);
   }, [item?.id]);
 
   if (!item) return null;
 
+  const selectedOptions = groups
+    .map((g) => g.options.find((o) => o.id === selections[g.id]))
+    .filter(Boolean);
+  const unitPrice = item.price + selectedOptions.reduce((sum, o) => sum + (o.priceDelta || 0), 0);
   const allRequiredSelected = groups.every((g) => !g.required || selections[g.id]);
 
   const handleConfirm = () => {
     if (!allRequiredSelected) return;
-    const labels = {};
+    const modifiers = {};
     groups.forEach((g) => {
       const opt = g.options.find((o) => o.id === selections[g.id]);
-      if (opt) labels[g.id] = opt.label;
+      if (opt) modifiers[g.id] = opt.label;
     });
-    onConfirm(labels, special.trim());
+    onConfirm({ modifiers, specialInstructions: special.trim(), qty, unitPrice });
   };
 
   return (
@@ -70,7 +77,7 @@ export default function ModifierModal({ item, onConfirm, onClose }) {
                 {item.name}
               </h2>
               <p className="mt-0.5 font-heading text-sm font-bold" style={{ color: "var(--k-gold)" }}>
-                ${item.price.toFixed(2)}
+                {money(unitPrice)}
               </p>
             </div>
             <button
@@ -113,6 +120,7 @@ export default function ModifierModal({ item, onConfirm, onClose }) {
                         key={opt.id}
                         type="button"
                         onClick={() => setSelections((s) => ({ ...s, [g.id]: opt.id }))}
+                        aria-pressed={selected}
                         className="k-focus flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors"
                         style={{
                           borderColor: selected ? "var(--k-gold)" : "var(--k-line)",
@@ -127,9 +135,12 @@ export default function ModifierModal({ item, onConfirm, onClose }) {
                             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "var(--k-gold)" }} />
                           )}
                         </span>
-                        <span className="text-sm font-medium" style={{ color: "var(--k-silk)" }}>
+                        <span className="flex-1 text-sm font-medium" style={{ color: "var(--k-silk)" }}>
                           {opt.label}
                         </span>
+                        {opt.priceDelta > 0 && (
+                          <span className="text-xs font-bold" style={{ color: "var(--k-gold)" }}>+{money(opt.priceDelta)}</span>
+                        )}
                       </button>
                     );
                   })}
@@ -153,18 +164,43 @@ export default function ModifierModal({ item, onConfirm, onClose }) {
           />
         </div>
 
-        {/* Footer */}
-        <div className="shrink-0 px-5 py-4" style={{ borderTop: "1px solid var(--k-line)" }}>
+        {/* Footer: quantity + confirm */}
+        <div className="shrink-0 space-y-3 px-5 py-4" style={{ borderTop: "1px solid var(--k-line)" }}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--k-muted)" }}>Quantity</span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                disabled={qty <= 1}
+                aria-label="Decrease quantity"
+                className="k-focus flex h-9 w-9 items-center justify-center rounded-full border disabled:opacity-40"
+                style={{ borderColor: "var(--k-line)", color: "var(--k-silk)" }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </button>
+              <span className="w-6 text-center font-heading text-base font-extrabold" style={{ color: "var(--k-silk)" }} aria-live="polite">{qty}</span>
+              <button
+                type="button"
+                onClick={() => setQty((q) => q + 1)}
+                aria-label="Increase quantity"
+                className="k-focus flex h-9 w-9 items-center justify-center rounded-full"
+                style={{ backgroundColor: "var(--k-gold)", color: "var(--k-surface)" }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </button>
+            </div>
+          </div>
           <button
             onClick={handleConfirm}
             disabled={!allRequiredSelected}
             className="k-focus flex h-12 w-full items-center justify-center rounded-full text-sm font-bold uppercase tracking-wide transition-transform hover:scale-[1.01] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             style={{ backgroundColor: "var(--k-gold)", color: "var(--k-surface)" }}
           >
-            Add to Order — ${item.price.toFixed(2)}
+            Add {qty} to Order — {money(unitPrice * qty)}
           </button>
           {!allRequiredSelected && (
-            <p className="mt-2 text-center text-[11px]" style={{ color: "var(--k-muted)" }}>
+            <p className="text-center text-[11px]" style={{ color: "var(--k-muted)" }}>
               Select all required options to continue.
             </p>
           )}

@@ -72,6 +72,8 @@ function CategoryGroup({ id, menuByCategory, qtyMap, onAdd, onInc, onDec, onImag
 export default function MenuSection({ category, menuByCategory, qtyMap, onAdd, onInc, onDec }) {
   const [lightbox, setLightbox] = useState(null);
   const isFullMenu = category === "full_menu";
+  const hasAnyItems = Object.values(menuByCategory || {}).some((list) => list.length > 0);
+  const categoryIsEmpty = !isFullMenu && (menuByCategory?.[category] || []).length === 0;
 
   useEffect(() => {
     if (!lightbox) return;
@@ -89,6 +91,16 @@ export default function MenuSection({ category, menuByCategory, qtyMap, onAdd, o
   return (
     <section className="k-surface">
       <div className="k-container py-10">
+        {(!hasAnyItems || categoryIsEmpty) && (
+          <div className="rounded-2xl p-10 text-center k-card">
+            <p className="font-heading text-base font-bold" style={{ color: "var(--k-silk)" }}>
+              {hasAnyItems ? "No dishes in this category yet" : "The menu is being updated"}
+            </p>
+            <p className="mt-2 text-sm" style={{ color: "var(--k-muted)" }}>
+              {hasAnyItems ? "Check back soon, or try another category." : "Please check back shortly, or call us to place an order."}
+            </p>
+          </div>
+        )}
         <div className="space-y-12">
           {isFullMenu
             ? CATEGORIES.map((cat) => (

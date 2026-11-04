@@ -37,6 +37,16 @@ const BUILT_IN_ITEMS = Object.entries(MENU).flatMap(([categoryId, dishes]) =>
   }))
 );
 
+const LIVE_MENU_TIMEOUT_MS = 4000;
+
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error("Menu request timed out")), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 // Loads live menu items from the MenuItem entity and keeps them grouped by
 // category in the same shape the customer-facing components expect.
 export function useMenu() {
@@ -46,7 +56,7 @@ export function useMenu() {
   const load = useCallback(async () => {
     let live = [];
     try {
-      live = (await base44.entities.MenuItem.list("-created_date", 500)) || [];
+      live = (await withTimeout(base44.entities.MenuItem.list("-created_date", 500), LIVE_MENU_TIMEOUT_MS)) || [];
     } catch (e) {
       live = [];
     }

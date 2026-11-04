@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { DINNER_BANNER, CATEGORIES } from "@/data/menu";
 import MenuItemCard from "./MenuItemCard";
 import DishLightbox from "./DishLightbox";
@@ -74,6 +74,19 @@ export default function MenuSection({ category, menuByCategory, qtyMap, onAdd, o
   const isFullMenu = category === "full_menu";
   const hasAnyItems = Object.values(menuByCategory || {}).some((list) => list.length > 0);
   const categoryIsEmpty = !isFullMenu && (menuByCategory?.[category] || []).length === 0;
+  const resultsRef = useRef(null);
+  const prevCategory = useRef(category);
+
+  useEffect(() => {
+    if (prevCategory.current === category) return;
+    prevCategory.current = category;
+    const el = resultsRef.current;
+    if (!el) return;
+    const offset = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+    const top = el.getBoundingClientRect().top;
+    const visible = top >= offset && top < window.innerHeight;
+    if (!visible) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [category]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -90,7 +103,7 @@ export default function MenuSection({ category, menuByCategory, qtyMap, onAdd, o
 
   return (
     <section className="k-surface">
-      <div className="k-container py-10">
+      <div ref={resultsRef} className="k-container scroll-mt-36 py-10">
         {(!hasAnyItems || categoryIsEmpty) && (
           <div className="rounded-2xl p-10 text-center k-card">
             <p className="font-heading text-base font-bold" style={{ color: "var(--k-silk)" }}>
